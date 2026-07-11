@@ -1,0 +1,127 @@
+# SpringBoot DeepSeek LangGraph Demo Application Configuration
+# SpringBoot DeepSeek LangGraph 演示应用配置文件
+# 作者 (Author): quanleilei
+# 日期 (Date): 2026-02-28
+
+spring:
+  application:
+    name: springboot-deepseek-langgraph
+
+  # Database Configuration (MySQL 5.7.35)
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+    username: root
+    password: ${DB_PASSWORD:12345678}
+    driver-class-name: com.mysql.jdbc.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        format_sql: true
+
+  # Web Configuration
+  web:
+    resources:
+      static-locations: classpath:/static/, file:./frontend/dist/
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# ============================================================================
+# 集中式API管理 (需求9) - CENTRALIZED API MANAGEMENT (Requirement 9)
+# 所有API URL和密钥都集中管理，便于维护
+# All API URLs and Keys are managed centrally for easy maintenance
+#
+# 配置说明 (Configuration Notes):
+# - 使用环境变量配置敏感信息，避免硬编码
+# - 环境变量格式: export VARIABLE_NAME=value
+# - Windows: set VARIABLE_NAME=value
+# - Linux/Mac: export VARIABLE_NAME=value
+# ============================================================================
+api:
+  # DeepSeek API Configuration (DeepSeek API配置)
+  deepseek:
+    url: ${DEEPSEEK_API_URL:https://api.deepseek.com}
+    # API密钥获取地址: https://platform.deepseek.com/
+    # 请设置环境变量: DEEPSEEK_API_KEY
+    # Please set environment variable: DEEPSEEK_API_KEY
+    key: ${DEEPSEEK_API_KEY}
+    model: ${DEEPSEEK_MODEL:deepseek-chat}  # 模型名称 (Model Name)
+    timeout: ${DEEPSEEK_TIMEOUT:60000}       # 超时时间(毫秒) (Timeout in ms)
+    max-tokens: ${DEEPSEEK_MAX_TOKENS:4000}  # 最大token数 (Max tokens)
+    temperature: ${DEEPSEEK_TEMPERATURE:0.7} # 温度参数，控制创造性 (Temperature for creativity)
+
+  # LangSmith API Configuration (LangSmith API配置)
+  # LangSmith用于追踪工作流执行、性能监控和调试
+  # LangSmith is used for workflow execution tracing, performance monitoring, and debugging
+  langsmith:
+    url: ${LANGSMITH_API_URL:https://api.smith.langchain.com}
+    # API密钥获取地址: https://smith.langchain.com/
+    # 配置后可在LangSmith平台查看工作流执行的详细追踪数据
+    # 请设置环境变量: LANGSMITH_API_KEY
+    # Please set environment variable: LANGSMITH_API_KEY
+    key: ${LANGSMITH_API_KEY}
+    # 项目名称必须在LangSmith平台中存在
+    # Project name must exist in LangSmith platform
+    project: ${LANGSMITH_PROJECT:langgraph-demo}
+    # 追踪端点配置
+    endpoint: ${LANGSMITH_ENDPOINT:https://api.smith.langchain.com/runs}
+    # 启用/禁用追踪功能 (Enable/disable tracing)
+    tracing-enabled: ${LANGSMITH_TRACING_ENABLED:true}
+
+# ============================================================================
+# LangGraph工作流配置 (LANGGRAPH WORKFLOW CONFIGURATION)
+# LangGraph用于多智能体工作流编排、状态持久化和检查点管理
+# LangGraph is used for multi-agent workflow orchestration, state persistence, and checkpointing
+# ============================================================================
+langgraph:
+  # 线程管理用于状态持久化 (Thread management for state persistence)
+  # LangGraph: 状态持久化 - 为每个线程维护独立的工作流状态
+  thread:
+    timeout: 300000        # 线程超时时间(毫秒) (Thread timeout in milliseconds)
+    max-states: 100        # 最大状态数量 (Maximum number of states to store)
+
+  # 检查点配置 (Checkpoint configuration)
+  # LangGraph: 检查点 - 保存工作流状态以便恢复执行
+  checkpoint:
+    enabled: true           # 启用检查点功能 (Enable checkpointing)
+    save-interval: 1000    # 保存间隔(毫秒) (Save interval in milliseconds)
+
+  # 工作流配置 (Workflow configuration)
+  # LangGraph: 循环工作流 - 控制工作流迭代和重试
+  workflow:
+    max-iterations: 10      # 最大迭代次数 (Maximum iterations per workflow)
+    retry-attempts: 3      # 重试次数 (Number of retry attempts)
+
+# ============================================================================
+# 日志配置 (LOGGING CONFIGURATION)
+# 用于调试和监控应用运行状态
+# Used for debugging and monitoring application runtime status
+# ============================================================================
+logging:
+  level:
+    root: INFO                    # 全局日志级别 (Global log level)
+    com.qll: DEBUG                # 应用日志级别 (Application log level)
+    org.springframework.web: INFO # Spring框架日志级别 (Spring framework log level)
+    org.hibernate: INFO           # Hibernate日志级别 (Hibernate log level)
+
+# ============================================================================
+# 应用元数据 (APPLICATION METADATA)
+# 应用基本信息和描述
+# Application basic information and description
+# ============================================================================
+app:
+  info:
+    name: SpringBoot DeepSeek LangGraph Demo
+    version: 1.0.0
+    author: quanleilei
+    created: 2026-02-28
+    description: LangGraph & LangSmith演示与DeepSeek集成
+    # description: LangGraph & LangSmith demonstration with DeepSeek integration
